@@ -10,7 +10,7 @@ import { LoggingInterceptor } from './shared/logger.interceptor';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      process.env.MONGODB_URI || 'mongodb+srv://kennedyikeka:.June1995@crater-main.68y60.mongodb.net/crater-server?retryWrites=true&w=majority',
+      process.env.MONGODB_URI || 'mongodb+srv://localhost:27017/crater-server',
       {
         useNewUrlParser: true,
         useFindAndModify: true,
