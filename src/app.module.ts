@@ -13,7 +13,7 @@ import { ListsModule } from './lists/lists.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      process.env.MONGODB_URI || 'mongodb://localhost:27017/crater-server',
+      process.env.MONGO_URI || 'mongodb://localhost:27017/crater-server',
       {
         useNewUrlParser: true,
         useFindAndModify: true,
