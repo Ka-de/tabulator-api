@@ -14,6 +14,22 @@ export class AuthenticationsService {
         private readonly authenticationModel: Model<AuthenticationDocument>
     ) { }
 
+    async find() {
+        const authentications = await this.authenticationModel.find();
+
+        return authentications.map(auth => {
+            auth.privatekey = undefined;
+            return auth;
+        });
+    }
+
+    async findById(_id: Types.ObjectId) {
+        const authentication = await this.authenticationModel.findOne({ _id });
+        authentication.privatekey = undefined;
+
+        return authentication;
+    }
+
     async create(data: AuthenticationDTO) {
         const authenticaion = await this.authenticationModel.findOne({ email: data.email });
         if (authenticaion) return this.findById(authenticaion._id);
@@ -24,12 +40,5 @@ export class AuthenticationsService {
 
         const newAuthentication = await model.save();
         return this.findById(newAuthentication._id);
-    }
-
-    async findById(_id: Types.ObjectId) {
-        const authentication = await this.authenticationModel.findOne({ _id });
-        authentication.privatekey = undefined;
-
-        return authentication;
     }
 }
