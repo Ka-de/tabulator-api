@@ -1,55 +1,49 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { PageDTO, PageModel, PageRO } from './page.model';
+import { Model, Types } from 'mongoose';
+import { PageDTO } from './dto/page.dto';
+import { Page, PageDocument } from './schema/page.schema';
 
 @Injectable()
 export class PageService {
     constructor(
-        @InjectModel('Page') private readonly pageModel: Model<PageModel>
+        @InjectModel(Page.name)
+        private readonly pageModel: Model<PageDocument>
     ) { }
 
+    async findById(id: Types.ObjectId) {
+        const page = await this.pageModel.findOne({ _id: id });
+        if (!page) throw new HttpException('Page not found', HttpStatus.NOT_FOUND);
+
+        return page;
+    }
+
+    async find() {
+        const pages = await this.pageModel.find();
+        return pages;
+    }
+
     async create(data: PageDTO) {
-        const page = await this.pageModel.create(data);
-        const saved = await page.save();
+        const model = new this.pageModel(data);
+        const newPage = await model.save();
 
-        return new PageRO(saved);
+        return this.findById(newPage._id);
     }
 
-    async update(id: string, data: Partial<PageDTO>) {
-        const page = await this.pageModel.findById(id);
+    async update(id: Types.ObjectId, data: Partial<PageDTO>) {
+        const page = await this.pageModel.findOneAndUpdate(
+            { _id: id },
+            { $set: data }
+        );
         if (!page) throw new HttpException('Page not found', HttpStatus.NOT_FOUND);
 
-        await this.pageModel.findOneAndUpdate({ _id: id }, data);
-        return this.get(id);
+        return this.findById(id);
     }
 
-    async get(id: string) {
-        const page = await this.pageModel.findById(id);
+    async delete(id: Types.ObjectId) {
+        const page = await this.pageModel.findOneAndDelete({ _id: id });
         if (!page) throw new HttpException('Page not found', HttpStatus.NOT_FOUND);
 
-        return new PageRO(page);
-    }
-
-    async getAll(page: number) {
-        let sort = page ? [
-            { $skip: 20 * (page - 1) },
-            { $limit: 20 },
-        ] : [];
-
-        const found = await this.pageModel.aggregate([
-            { $project: { __v: 0 } },
-            ...sort
-        ]);
-
-        return found.map(p => new PageRO(p as PageDTO));
-    }
-
-    async delete(id: string) {
-        const page = await this.pageModel.findById(id);
-        if (!page) throw new HttpException('Page not found', HttpStatus.NOT_FOUND);
-
-        await this.pageModel.findOneAndDelete({ _id: id });
-        return new PageRO(page);
+        return page;
     }
 }

@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 import { PageModule } from './page/page.module';
 import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logger.interceptor';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { AuthenticationsModule } from './authentications/authentications.module';
+import { ListsModule } from './lists/lists.module';
 
 @Module({
   imports: [
@@ -17,7 +20,10 @@ import { LoggingInterceptor } from './shared/logger.interceptor';
         useCreateIndex: true
       }
     ),
-    PageModule
+    PageModule,
+    SubscriptionsModule,
+    AuthenticationsModule,
+    ListsModule
   ],
   controllers: [AppController],
   providers: [
