@@ -8,7 +8,7 @@ import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logger.interceptor';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { AuthenticationsModule } from './authentications/authentications.module';
-import { ListsModule } from './lists/lists.module';
+import { TablesModule } from './tables/tables.module';
 
 @Module({
   imports: [
@@ -17,13 +17,13 @@ import { ListsModule } from './lists/lists.module';
       {
         useNewUrlParser: true,
         useFindAndModify: true,
-        useCreateIndex: true
+        useCreateIndex: true,
       }
     ),
     PageModule,
     SubscriptionsModule,
     AuthenticationsModule,
-    ListsModule
+    TablesModule
   ],
   controllers: [AppController],
   providers: [
