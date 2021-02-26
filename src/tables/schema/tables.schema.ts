@@ -8,6 +8,9 @@ export class Table {
     @Prop()
     title: string;
 
+    @Prop()
+    description: string;
+
     @Prop({ default: [] })
     attatchments: string[];
 

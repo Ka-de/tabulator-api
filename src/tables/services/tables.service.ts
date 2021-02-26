@@ -43,21 +43,23 @@ export class TablesService {
         const found = await this.tableModel.findOne({ _id });
         if (!found) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
 
+        const tables = await this.tableModel.find();
+
         if (data.title) {
-            const checkTitle = await this.tableModel.findOne({ title: data.title });
+            const checkTitle = tables.find(t => t.title == data.title && t._id != _id);
             if (checkTitle) throw new HttpException('Table with title already exists', HttpStatus.NOT_FOUND);
         }
 
         await this.tableModel.findOneAndUpdate({ _id }, { $set: data });
 
-        return this.findById(_id);
+        return data;
     }
 
     async delete(_id: Types.ObjectId) {
         const table = await this.findById(_id);
         if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
 
-        await this.tableModel.deleteOne({ _id });
-        return table;
+        const done = await this.tableModel.deleteOne({ _id });
+        return { ...done, _id };
     }
 }

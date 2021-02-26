@@ -14,6 +14,9 @@ export class TableColumn {
     datatype: TableDataTypes;
 
     @Prop()
+    description?: string;
+
+    @Prop()
     required?: boolean;
 
     @Prop()

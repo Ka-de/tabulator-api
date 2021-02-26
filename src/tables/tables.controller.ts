@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { AuthenticationGuard } from 'src/shared/authentication.guard';
 import { TableRowDTO } from './dto/table-row.dto';

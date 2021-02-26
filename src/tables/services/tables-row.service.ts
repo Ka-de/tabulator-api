@@ -33,7 +33,7 @@ export class TablesRowService {
             }
         });
 
-        return (await this.findById(_id)).rows;
+        return (await this.findById(_id)).rows.find(r => r.r_id == data.r_id);
     }
 
     async update(_id: Types.ObjectId, rowId: string, data: Partial<TableRowDTO>) {
@@ -55,21 +55,21 @@ export class TablesRowService {
             }
         );
 
-        return (await this.findById(_id)).rows;
+        return (await this.findById(_id)).rows.find(r => r.r_id == rowId);
     }
 
-    async delete(_id: Types.ObjectId, rowId: string) {
+    async delete(_id: Types.ObjectId, row_id: string) {       
         const table = await this.tableModel.findOneAndUpdate({ _id },
             {
                 $pull: {
                     rows: {
-                        r_id: rowId
+                        r_id: row_id
                     }
                 }
             }
         );
         if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
 
-        return (await this.findById(_id)).rows;
+        return { ok: true, n: 1, _id, row_id };
     }
 }

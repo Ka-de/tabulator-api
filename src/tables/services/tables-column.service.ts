@@ -40,7 +40,7 @@ export class TablesColumnService {
         const table = await this.tableModel.findOneAndUpdate({ _id }, { $push: { columns: data } });
         if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
 
-        return (await this.findById(_id)).columns;
+        return (await this.findById(_id)).columns.find(c => c.name == data.name);
     }
 
     async update(
@@ -54,7 +54,7 @@ export class TablesColumnService {
         if (!column) throw new HttpException('Column not found in table', HttpStatus.CONFLICT);
 
         if (data.name) {
-            const found = table.columns.find(c => c.name == data.name);
+            const found = table.columns.find(c => c.name == data.name && c._id != columnId);
             if (found) throw new HttpException('Column with name already exists in table', HttpStatus.CONFLICT);
         }//does column with name exist?
 
@@ -63,30 +63,45 @@ export class TablesColumnService {
         const columnUpdate: any = {};
         for (let i in data) {
             columnUpdate[`columns.$.${i}`] = data[i];
-        }//set the update
+        }//set the column update
 
         await this.tableModel.findOneAndUpdate(
             { _id, 'columns._id': columnId },
             {
-                $set: columnUpdate
+                $set: columnUpdate,
             }
         );
 
-        return (await this.findById(_id)).columns;
+        if (data.name) {
+            const rows = table.rows.map(r => {
+                let value = r[column.name];
+                delete r[column.name];
+
+                r[data.name] = value;
+                return r;
+            });
+
+            await this.tableModel.findOneAndUpdate(
+                { _id },
+                { rows }
+            );
+        }
+
+        return (await this.findById(_id)).columns.find(c => c._id == columnId);
     }
 
-    async delete(_id: Types.ObjectId, columnId: Types.ObjectId) {
+    async delete(_id: Types.ObjectId, column_id: Types.ObjectId) {
         const table = await this.tableModel.findOneAndUpdate({ _id },
             {
                 $pull: {
                     columns: {
-                        _id: columnId
+                        _id: column_id
                     }
                 }
             }
         );
         if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
 
-        return (await this.findById(_id)).columns;
+        return { ok: true, n: 1, _id, column_id };
     }
 }
