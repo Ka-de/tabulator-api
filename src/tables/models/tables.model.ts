@@ -1,18 +1,19 @@
 export enum TableDataTypes {
     TEXT = "text",
-    LONG_TEXT = "long text",
+    LONGTEXT = "longtext",
     NUMBER = "number",
-    SELECT = "select",
-    MONEY = "money",
+    BOOLEAN = "boolean",
     DATE = "date",
     TIME = "time",
-    DATE_TIME = "date time",
+    DATETIME = "datetime",
+    LIST = "list",
+    PROPERTYLIST = "propertylist",
+    CHOICE = "choice",
+    MONEY = "money",
     LOOKUP = "look up",
-    BOOLEAN = "boolean",
     IMAGE = "image",
     URL = "url",
     FORMULAR = "formular",
-    STATUS = "status",
     COLLECTION = "collection"
 }
 

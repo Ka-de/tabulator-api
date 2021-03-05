@@ -1,26 +1,28 @@
-import { Prop, Schema } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
 import { TableDataTypes } from "../models/tables.model";
 
 @Schema({ timestamps: true })
 export class TableColumn {
-    @Prop()
+    @Prop({ type: Types.ObjectId })
     _id: Types.ObjectId;
 
-    @Prop()
+    @Prop({ type: String })
     name: string;
 
-    @Prop()
+    @Prop({ type: TableDataTypes })
     datatype: TableDataTypes;
 
-    @Prop()
-    description?: string;
+    @Prop({ type: String })
+    description: string;
 
-    @Prop()
+    @Prop({ type: Boolean })
     required?: boolean;
 
-    @Prop()
+    @Prop({ type: Boolean })
     unique?: boolean;
+
+    @Prop({ type: {} })
+    attributes?: any;
 }
 export type TableColumnDocument = TableColumn & Document;
-

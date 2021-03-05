@@ -29,13 +29,13 @@ export class TablesColumnService {
         return table;
     }
 
-    async create(_id: Types.ObjectId, data: TableColumnDTO) {
+    async create(_id: Types.ObjectId, data: any) {        
         if (!data.name) throw new HttpException('Column name is required', HttpStatus.BAD_REQUEST);
         if (!data.datatype) throw new HttpException('Column datatype is required', HttpStatus.BAD_REQUEST);
         this.validateColumnDatatype(data.datatype);
 
         const found = await this.tableModel.findOne({ 'columns.name': data.name });
-        if (found) throw new HttpException('Column with name already exists in table', HttpStatus.CONFLICT);
+        if (found) throw new HttpException('Column with name already exists in table', HttpStatus.CONFLICT);        
 
         const table = await this.tableModel.findOneAndUpdate({ _id }, { $push: { columns: data } });
         if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
@@ -48,8 +48,7 @@ export class TablesColumnService {
         columnId: Types.ObjectId,
         data: Partial<TableColumnDTO>
     ) {
-        const table = await this.findById(_id);
-
+        const table = await this.findById(_id);        
         const column = table.columns.find(c => c._id == columnId);//does column exist?
         if (!column) throw new HttpException('Column not found in table', HttpStatus.CONFLICT);
 

@@ -30,6 +30,8 @@ export class Table {
                 datatype: String,
                 required: Boolean,
                 unique: Boolean,
+                description: String,
+                attributes: {}
             }
         ], default: []
     })
@@ -44,5 +46,6 @@ export class Table {
     @Prop()
     editor: Types.ObjectId;
 }
+
 export type TableDocument = Table & Document;
 export const TableSchema = SchemaFactory.createForClass(Table);
