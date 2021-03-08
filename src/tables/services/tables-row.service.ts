@@ -3,13 +3,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Table, TableDocument } from '../schema/tables.schema';
 import { TableRowDTO } from '../dto/table-row.dto';
+import { ValidateRow } from 'src/shared/row.validator';
+import { validate } from 'uuid';
 
 @Injectable()
 export class TablesRowService {
 
     constructor(
         @InjectModel(Table.name)
-        private readonly tableModel: Model<TableDocument>
+        private readonly tableModel: Model<TableDocument>,
+        private rowValidator: ValidateRow
     ) { }
 
     async find() {
@@ -26,7 +29,14 @@ export class TablesRowService {
 
     async create(_id: Types.ObjectId, data: TableRowDTO) {
         const table = await this.findById(_id);
-        data = new TableRowDTO(data, table);
+
+        try {
+            await this.rowValidator.validate(data, table);
+        } catch (error) {
+            throw new HttpException(error, HttpStatus.BAD_REQUEST);
+        }
+        data = new TableRowDTO(data);
+
         await this.tableModel.findOneAndUpdate({ _id }, {
             $push: {
                 rows: data
@@ -42,7 +52,15 @@ export class TablesRowService {
         const row = table.rows.find(row => row.r_id == rowId);
         if (!row) throw new HttpException('Row not found in table', HttpStatus.CONFLICT);
 
-        data = new TableRowDTO({ ...row, ...data, r_id: row.r_id }, table);
+        try {
+            await this.rowValidator.validate({ ...row, ...data, r_id: row.r_id }, table)
+        } catch (error) {
+            throw new HttpException(error, HttpStatus.BAD_REQUEST);
+        }
+        
+        data = new TableRowDTO(data);
+        console.log(data);
+
         const rowUpdate: any = {};
         for (let i in data) {
             rowUpdate[`rows.$.${i}`] = data[i];
@@ -58,7 +76,7 @@ export class TablesRowService {
         return (await this.findById(_id)).rows.find(r => r.r_id == rowId);
     }
 
-    async delete(_id: Types.ObjectId, row_id: string) {       
+    async delete(_id: Types.ObjectId, row_id: string) {
         const table = await this.tableModel.findOneAndUpdate({ _id },
             {
                 $pull: {

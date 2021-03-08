@@ -5,6 +5,7 @@ import { TablesService } from './services/tables.service';
 import { Table, TableSchema } from './schema/tables.schema';
 import { TablesColumnService } from './services/tables-column.service';
 import { TablesRowService } from './services/tables-row.service';
+import { ValidateRow } from 'src/shared/row.validator';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { TablesRowService } from './services/tables-row.service';
   providers: [
     TablesService,
     TablesColumnService,
-    TablesRowService
+    TablesRowService,
+    ValidateRow
   ]
 })
 export class TablesModule { }

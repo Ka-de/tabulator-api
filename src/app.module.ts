@@ -9,6 +9,7 @@ import { LoggingInterceptor } from './shared/logger.interceptor';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { AuthenticationsModule } from './authentications/authentications.module';
 import { TablesModule } from './tables/tables.module';
+import { ValidateRow } from './shared/row.validator';
 
 @Module({
   imports: [
