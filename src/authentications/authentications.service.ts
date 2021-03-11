@@ -43,7 +43,7 @@ export class AuthenticationsService {
 
         const model = new this.authenticationModel(data);
 
-        model.publickey = jwt.sign({
+        model.privatekey = jwt.sign({
             _id: model._id,
             email: model.email
         }, process.env.SECRET);

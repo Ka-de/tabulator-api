@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Table, TableDocument } from '../schema/tables.schema';
 import { TableDataTypes } from '../models/tables.model';
 import { TableColumnDTO } from '../dto/tables-column.dto';
+import { TablesService } from './tables.service';
 
 @Injectable()
 export class TablesColumnService {
@@ -14,33 +15,38 @@ export class TablesColumnService {
 
     constructor(
         @InjectModel(Table.name)
-        private readonly tableModel: Model<TableDocument>
+        private readonly tableModel: Model<TableDocument>,
+        private tableService: TablesService
     ) { }
 
-    async find() {
-        const Table = await this.tableModel.find();
-        return Table;
+    async find(_id: Types.ObjectId) {
+        const table = await this.tableService.findById(_id);
+        return table.columns;
     }
 
-    async findById(_id: Types.ObjectId) {
-        const table = await this.tableModel.findOne({ _id });
-        if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
+    async findById(_id: Types.ObjectId, column_id: Types.ObjectId) {
+        const table = await this.tableService.findById(_id);
 
-        return table;
+        const column = table.columns.find(c => c._id == column_id);
+        if (!column) throw new HttpException('Column in table not found', HttpStatus.NOT_FOUND);
+
+        return column;
     }
 
-    async create(_id: Types.ObjectId, data: any) {        
+    async create(_id: Types.ObjectId, data: any) {
+        //require name and datatype
         if (!data.name) throw new HttpException('Column name is required', HttpStatus.BAD_REQUEST);
         if (!data.datatype) throw new HttpException('Column datatype is required', HttpStatus.BAD_REQUEST);
-        this.validateColumnDatatype(data.datatype);
+        this.validateColumnDatatype(data.datatype);//validate the datatype
 
-        const found = await this.tableModel.findOne({ 'columns.name': data.name });
-        if (found) throw new HttpException('Column with name already exists in table', HttpStatus.CONFLICT);        
+        const found = await this.tableModel.findOne({ 'columns.name': data.name });//check if name has been used
+        if (found) throw new HttpException('Column with name already exists in table', HttpStatus.CONFLICT);
 
+        //create column by updating table
         const table = await this.tableModel.findOneAndUpdate({ _id }, { $push: { columns: data } });
         if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
 
-        return (await this.findById(_id)).columns.find(c => c.name == data.name);
+        return (await this.tableService.findById(_id)).columns.find(c => c.name == data.name);
     }
 
     async update(
@@ -48,7 +54,7 @@ export class TablesColumnService {
         columnId: Types.ObjectId,
         data: Partial<TableColumnDTO>
     ) {
-        const table = await this.findById(_id);        
+        const table = await this.tableService.findById(_id);
         const column = table.columns.find(c => c._id == columnId);//does column exist?
         if (!column) throw new HttpException('Column not found in table', HttpStatus.CONFLICT);
 
@@ -69,7 +75,7 @@ export class TablesColumnService {
             {
                 $set: columnUpdate,
             }
-        );
+        );//update the column
 
         if (data.name) {
             const rows = table.rows.map(r => {
@@ -84,13 +90,14 @@ export class TablesColumnService {
                 { _id },
                 { rows }
             );
-        }
+        }//rename the rows if the column name changed
 
-        return (await this.findById(_id)).columns.find(c => c._id == columnId);
+        return (await this.findById(_id, columnId));
     }
 
     async delete(_id: Types.ObjectId, column_id: Types.ObjectId) {
-        const table = await this.tableModel.findOneAndUpdate({ _id },
+        const table = await this.tableModel.findOneAndUpdate(
+            { _id },
             {
                 $pull: {
                     columns: {

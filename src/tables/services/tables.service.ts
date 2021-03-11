@@ -45,7 +45,7 @@ export class TablesService {
 
         const tables = await this.tableModel.find();
 
-        if (data.title) {
+        if (data.title) {//Check for existence of another table with same title
             const checkTitle = tables.find(t => t.title == data.title && t._id != _id);
             if (checkTitle) throw new HttpException('Table with title already exists', HttpStatus.NOT_FOUND);
         }

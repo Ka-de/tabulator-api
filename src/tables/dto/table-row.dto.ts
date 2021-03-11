@@ -9,6 +9,6 @@ export class TableRowDTO {
             this[k] = data[k];
         });
         
-        this.r_id = this.r_id || uuidv4();
+        this.r_id = this.r_id || uuidv4();//set the ID
     }
 }
