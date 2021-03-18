@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Table, TableDocument } from '../schema/tables.schema';
 import { TableDataTypes } from '../models/tables.model';
-import { TableColumnDTO } from '../dto/tables-column.dto';
+import { TableColumnCloneDTO, TableColumnDTO } from '../dto/tables-column.dto';
 import { TablesService } from './tables.service';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class TablesColumnService {
         return column;
     }
 
-    async create(_id: Types.ObjectId, data: any) {
+    async create(_id: Types.ObjectId, data: TableColumnDTO) {
         //require name and datatype
         if (!data.name) throw new HttpException('Column name is required', HttpStatus.BAD_REQUEST);
         if (!data.datatype) throw new HttpException('Column datatype is required', HttpStatus.BAD_REQUEST);
@@ -93,6 +93,30 @@ export class TablesColumnService {
         }//rename the rows if the column name changed
 
         return (await this.findById(_id, columnId));
+    }
+
+    async clone(_id: Types.ObjectId, data: TableColumnCloneDTO) {
+        //require name and datatype
+        if (!data.name) throw new HttpException('Column name is required', HttpStatus.BAD_REQUEST);
+        if (!data.datatype) throw new HttpException('Column datatype is required', HttpStatus.BAD_REQUEST);
+        this.validateColumnDatatype(data.datatype);//validate the datatype
+
+        const found = await this.tableModel.findOne({ 'columns.name': data.name });//check if name has been used
+        if (found) throw new HttpException('Column with name already exists in table', HttpStatus.CONFLICT);
+
+        //create column by updating table
+        const table = await this.tableModel.findOneAndUpdate({ _id }, { $push: { columns: data } });
+        if (!table) throw new HttpException('Table not found', HttpStatus.NOT_FOUND);
+
+        if (data.withrows) {
+            table.rows = table.rows.map(row => {                
+                return { ...row, [data.name]: row[data.from] }
+            });            
+
+            await this.tableModel.findOneAndUpdate({ _id }, { rows: table.rows });
+        }
+
+        return (await this.tableService.findById(_id));
     }
 
     async delete(_id: Types.ObjectId, column_id: Types.ObjectId) {

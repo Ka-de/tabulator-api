@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { AuthenticationGuard } from 'src/shared/authentication.guard';
 import { TableRowDTO } from './dto/table-row.dto';
-import { TableColumnDTO } from './dto/tables-column.dto';
+import { TableColumnCloneDTO, TableColumnDTO } from './dto/tables-column.dto';
 import { TableDTO, TableEditable } from './dto/tables.dto';
 import { TablesColumnService } from './services/tables-column.service';
 import { TablesRowService } from './services/tables-row.service';
@@ -63,6 +63,15 @@ export class TablesController {
         @Body() data: Partial<TableColumnDTO>
     ) {
         return this.tablesColumnService.update(id, columnId, data);
+    }
+
+    @Put(':id/columns')
+    @UseGuards(new AuthenticationGuard())
+    cloneColumn(
+        @Param('id') id: Types.ObjectId,
+        @Body() data: TableColumnCloneDTO
+    ) {
+        return this.tablesColumnService.clone(id, data);
     }
 
     @Delete(':id/columns/:columnId')
