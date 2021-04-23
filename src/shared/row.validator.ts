@@ -1,7 +1,11 @@
+import { HttpService } from "@nestjs/common";
+import { createWriteStream } from "fs";
 import { TableRowDTO } from "src/tables/dto/table-row.dto";
 import { TableColumnEntity, TableDataTypes } from "src/tables/models/tables.model";
 import { TableColumn } from "src/tables/schema/table-column.schema";
 import { Table } from "src/tables/schema/tables.schema";
+import { v4 as uuidV4 } from "uuid";
+import { hostname } from "os"
 
 export class ValidateRow {
     constructor(
@@ -9,7 +13,8 @@ export class ValidateRow {
 
     async validate(
         data: TableRowDTO | Partial<TableRowDTO>,
-        table: Table
+        table: Table,
+        httpService: HttpService
     ) {
         const columnEntity: TableColumnEntity<TableColumn> = table.columns.reduce((acc, column) =>
             ({ ...acc, [column.name]: column }), {});//name column with column.name
@@ -28,10 +33,13 @@ export class ValidateRow {
                     return Promise.reject(`${i} is unique in table`);
                 }
             }
-            
+
             try {
                 await this.isRequired((data as any)[i], columnEntity[i]);//make sure required cells are defined
+
                 await this.isType((data as any)[i], columnEntity[i]);//check for type correctness
+
+                data[i] = await this.transform((data as any)[i], columnEntity[i], httpService);//transform data to what can be stored.
             } catch (error) {
                 return Promise.reject(error);
             }
@@ -117,7 +125,46 @@ export class ValidateRow {
                 return Promise.reject(`${column.name} in table is a ${column.datatype}, but the value is not a valid URL`);
             }
         }
+        else if (column.datatype == TableDataTypes.SELECT) {
+            if (column.attributes?.multiple && !Array.isArray(data)) {
+                return Promise.reject(`${column.name} in table is a ${column.datatype} with multiple attribute, expected a list`);
+            }
+            else if (!column.attributes?.multiple && typeof data !== 'string') {
+                return Promise.reject(`${column.name} in table is a ${column.datatype} with single attribute, expected a single data`);
+            }
+        }
+        else if (column.datatype == TableDataTypes.IMAGE) {
+            try {
+                new URL(data.url);//make sure it's a valid URL
+            } catch (error) {
+                return Promise.reject(`${column.name} in table is a ${column.datatype}, but the value is not a valid URL`);
+            }
+        }
 
         return;
+    }
+
+    async transform(data: any, column: TableColumn, httpService: HttpService) {
+        if (column.datatype == TableDataTypes.IMAGE) {
+            data.local = await this.downloadFile(data.url, "png", httpService);
+        }
+        return data;
+    }
+
+    async downloadFile(url: string, ext: string, httpService: HttpService) {
+        const path = `documents/${uuidV4()}-${uuidV4()}.${ext}`;
+        const writer = createWriteStream(path);
+
+        const response = await httpService.axiosRef({
+            url: url,
+            method: 'GET',
+            responseType: 'stream',
+        });
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on("finish", () => { resolve(path) });
+            writer.on("error", reject);
+        });
     }
 }

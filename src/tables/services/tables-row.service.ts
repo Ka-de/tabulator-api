@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpService, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Table, TableDocument } from '../schema/tables.schema';
@@ -13,7 +13,8 @@ export class TablesRowService {
         @InjectModel(Table.name)
         private readonly tableModel: Model<TableDocument>,
         private tableService: TablesService,
-        private rowValidator: ValidateRow
+        private rowValidator: ValidateRow,
+        private httpService: HttpService
     ) { }
 
     async find(_id: Types.ObjectId) {
@@ -34,7 +35,7 @@ export class TablesRowService {
 
         try {
             //validate row to match the tables columns
-            await this.rowValidator.validate(data, table);
+            data = <TableRowDTO>await this.rowValidator.validate(data, table, this.httpService);
         } catch (error) {
             throw new HttpException(error, HttpStatus.BAD_REQUEST);
         }
@@ -59,7 +60,7 @@ export class TablesRowService {
 
         try {
             //validate row to match the tables columns
-            await this.rowValidator.validate({ ...row, ...data, r_id: row.r_id }, table)
+            data = <TableRowDTO>await this.rowValidator.validate({ ...row, ...data, r_id: row.r_id }, table, this.httpService)
         } catch (error) {
             throw new HttpException(error, HttpStatus.BAD_REQUEST);
         }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { HttpModule, HttpService, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TablesController } from './tables.controller';
 import { TablesService } from './services/tables.service';
@@ -9,16 +9,17 @@ import { ValidateRow } from 'src/shared/row.validator';
 
 @Module({
   imports: [
+    HttpModule,
     MongooseModule.forFeature([
       { name: Table.name, schema: TableSchema }
-    ])
+    ]),
   ],
   controllers: [TablesController],
   providers: [
     TablesService,
     TablesColumnService,
     TablesRowService,
-    ValidateRow
+    ValidateRow,
   ]
 })
 export class TablesModule { }

@@ -8,7 +8,7 @@ export enum TableDataTypes {
     DATETIME = "datetime",
     LIST = "list",
     PROPERTYLIST = "propertylist",
-    CHOICE = "choice",
+    SELECT = "select",
     MONEY = "money",
     LOOKUP = "look up",
     IMAGE = "image",

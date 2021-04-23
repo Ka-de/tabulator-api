@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpService, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { AuthenticationGuard } from 'src/shared/authentication.guard';
 import { TableRowDTO } from './dto/table-row.dto';
@@ -13,8 +13,9 @@ export class TablesController {
     constructor(
         private tablesService: TablesService,
         private tablesColumnService: TablesColumnService,
-        private tablesRowService: TablesRowService
-    ) { }
+        private tablesRowService: TablesRowService,
+    ) {         
+    }
 
     @Get()
     @UseGuards(new AuthenticationGuard())
