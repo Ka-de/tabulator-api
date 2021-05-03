@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { TableDTO, TableEditable } from '../dto/tables.dto';
-import { Table, TableDocument } from '../schema/tables.schema';
-import { TableDataTypes } from '../models/tables.model';
+import { TableDTO, TableEditable } from './models/tables.dto';
+import { Table, TableDocument } from './schema/tables.schema';
+import { TableDataTypes } from './models/tables.model';
 
 @Injectable()
 export class TablesService {

@@ -1,13 +1,14 @@
 import { HttpException, HttpService, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Table, TableDocument } from '../schema/tables.schema';
-import { TableRowDTO } from '../dto/table-row.dto';
 import { ValidateRow } from 'src/shared/row.validator';
-import { TablesService } from './tables.service';
+import { Table, TableDocument } from 'src/tables/schema/tables.schema';
+import { TablesService } from 'src/tables/tables.service';
+import { RowDTO } from './models/row.dto';
+
 
 @Injectable()
-export class TablesRowService {
+export class RowsService {
 
     constructor(
         @InjectModel(Table.name)
@@ -30,16 +31,18 @@ export class TablesRowService {
         return row;
     }
 
-    async create(_id: Types.ObjectId, data: TableRowDTO) {
+    async create(_id: Types.ObjectId, data: RowDTO) {
         const table = await this.tableService.findById(_id);
 
         try {
             //validate row to match the tables columns
-            data = <TableRowDTO>await this.rowValidator.validate(data, table, this.httpService);
+            data = <RowDTO>await this.rowValidator.validate(data, table, this.httpService);
         } catch (error) {
             throw new HttpException(error, HttpStatus.BAD_REQUEST);
         }
-        data = new TableRowDTO(data);
+        data = new RowDTO(data);
+
+        
 
         //add the row to table as update
         await this.tableModel.findOneAndUpdate({ _id }, {
@@ -52,7 +55,7 @@ export class TablesRowService {
         return (await this.tableModel.findById(_id)).rows.find(r => r.r_id == data.r_id);
     }
 
-    async update(_id: Types.ObjectId, rowId: string, data: Partial<TableRowDTO>) {
+    async update(_id: Types.ObjectId, rowId: string, data: Partial<RowDTO>) {
         const table = await this.tableService.findById(_id);
 
         const row = table.rows.find(row => row.r_id == rowId);
@@ -60,12 +63,12 @@ export class TablesRowService {
 
         try {
             //validate row to match the tables columns
-            data = <TableRowDTO>await this.rowValidator.validate({ ...row, ...data, r_id: row.r_id }, table, this.httpService)
+            data = <RowDTO>await this.rowValidator.validate({ ...row, ...data, r_id: row.r_id }, table, this.httpService)
         } catch (error) {
             throw new HttpException(error, HttpStatus.BAD_REQUEST);
         }
 
-        data = new TableRowDTO(data);//convert to a Row data transfer object
+        data = new RowDTO(data);//convert to a Row data transfer object
         const rowUpdate: any = {};
         for (let i in data) {
             rowUpdate[`rows.$.${i}`] = data[i];

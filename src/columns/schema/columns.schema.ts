@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
-import { TableDataTypes } from "../models/tables.model";
+import { TableDataTypes } from "src/tables/models/tables.model";
 
 @Schema({ timestamps: true })
-export class TableColumn {
+export class Column {
     @Prop({ type: Types.ObjectId })
     _id: Types.ObjectId;
 
@@ -25,4 +25,5 @@ export class TableColumn {
     @Prop({ type: {} })
     attributes?: any;
 }
-export type TableColumnDocument = TableColumn & Document;
+export type ColumnDocument = Column & Document;
+export const ColumnSchema = SchemaFactory.createForClass(Column);

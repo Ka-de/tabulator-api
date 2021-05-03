@@ -5,9 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logger.interceptor';
-import { SubscriptionsModule } from './subscriptions/subscriptions.module';
-import { AuthenticationsModule } from './authentications/authentications.module';
 import { TablesModule } from './tables/tables.module';
+import { ColumnsModule } from './columns/columns.module';
+import { RowsModule } from './rows/rows.module';
 
 @Module({
   imports: [
@@ -19,9 +19,9 @@ import { TablesModule } from './tables/tables.module';
         useCreateIndex: true,
       }
     ),
-    SubscriptionsModule,
-    AuthenticationsModule,
-    TablesModule
+    TablesModule,
+    ColumnsModule,
+    RowsModule
   ],
   controllers: [AppController],
   providers: [

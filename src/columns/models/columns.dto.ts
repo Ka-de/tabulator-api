@@ -1,6 +1,6 @@
-import { TableDataTypes } from "../models/tables.model";
+import { TableDataTypes } from "src/tables/models/tables.model";
 
-export interface TableColumnDTO {
+export interface ColumnDTO {
     name: string;
     datatype: TableDataTypes;
     attributes?: any;
@@ -10,7 +10,7 @@ export interface TableColumnDTO {
     simple: string;
 }
 
-export interface TableColumnCloneDTO extends TableColumnDTO {
+export interface ColumnCloneDTO extends ColumnDTO {
     withrows: boolean;
     from: string;
 }

@@ -16,7 +16,3 @@ export enum TableDataTypes {
     FORMULAR = "formular",
     COLLECTION = "collection"
 }
-
-export interface TableColumnEntity<C> {
-    [name: string]: C;
-}

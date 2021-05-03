@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { TableColumn } from './table-column.schema';
-import { TableRow } from './table-row.schema';
+import { Column } from 'src/columns/schema/columns.schema';
+import { Row } from 'src/rows/schema/rows.schema';
 
 @Schema({ timestamps: true })
 export class Table {
@@ -35,10 +35,10 @@ export class Table {
             }
         ], default: []
     })
-    columns: TableColumn[];
+    columns: Column[];
 
     @Prop({ type: [], default: [] })
-    rows: TableRow[];
+    rows: Row[];
 
     @Prop()
     author: Types.ObjectId;

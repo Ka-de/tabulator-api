@@ -1,13 +1,15 @@
+
+
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Table, TableDocument } from '../schema/tables.schema';
-import { TableDataTypes } from '../models/tables.model';
-import { TableColumnCloneDTO, TableColumnDTO } from '../dto/tables-column.dto';
-import { TablesService } from './tables.service';
+import { TableDataTypes } from 'src/tables/models/tables.model';
+import { Table, TableDocument } from 'src/tables/schema/tables.schema';
+import { TablesService } from 'src/tables/tables.service';
+import { ColumnCloneDTO, ColumnDTO } from './models/columns.dto';
 
 @Injectable()
-export class TablesColumnService {
+export class ColumnsService {
 
     validateColumnDatatype(value: any) {
         if (!Object.values(TableDataTypes).includes(value)) throw new HttpException('Column datatype is not allowed', HttpStatus.FORBIDDEN);
@@ -33,7 +35,7 @@ export class TablesColumnService {
         return column;
     }
 
-    async create(_id: Types.ObjectId, data: TableColumnDTO) {
+    async create(_id: Types.ObjectId, data: ColumnDTO) {
         //require name and datatype
         if (!data.name) throw new HttpException('Column name is required', HttpStatus.BAD_REQUEST);
         if (!data.datatype) throw new HttpException('Column datatype is required', HttpStatus.BAD_REQUEST);
@@ -52,7 +54,7 @@ export class TablesColumnService {
     async update(
         _id: Types.ObjectId,
         columnId: Types.ObjectId,
-        data: Partial<TableColumnDTO>
+        data: Partial<ColumnDTO>
     ) {
         const table = await this.tableService.findById(_id);
         const column = table.columns.find(c => c._id == columnId);//does column exist?
@@ -95,7 +97,7 @@ export class TablesColumnService {
         return (await this.findById(_id, columnId));
     }
 
-    async clone(_id: Types.ObjectId, data: TableColumnCloneDTO) {
+    async clone(_id: Types.ObjectId, data: ColumnCloneDTO) {
         //require name and datatype
         if (!data.name) throw new HttpException('Column name is required', HttpStatus.BAD_REQUEST);
         if (!data.datatype) throw new HttpException('Column datatype is required', HttpStatus.BAD_REQUEST);

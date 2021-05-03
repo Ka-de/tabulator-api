@@ -1,22 +1,22 @@
 import { HttpService } from "@nestjs/common";
 import { createWriteStream } from "fs";
-import { TableRowDTO } from "src/tables/dto/table-row.dto";
-import { TableColumnEntity, TableDataTypes } from "src/tables/models/tables.model";
-import { TableColumn } from "src/tables/schema/table-column.schema";
 import { Table } from "src/tables/schema/tables.schema";
 import { v4 as uuidV4 } from "uuid";
-import { hostname } from "os"
+import { Column } from "src/columns/schema/columns.schema";
+import { TableDataTypes } from "src/tables/models/tables.model";
+import { Row } from "src/rows/schema/rows.schema";
+import { ColumnEntity } from "src/columns/models/column.entity";
 
 export class ValidateRow {
     constructor(
     ) { }
 
     async validate(
-        data: TableRowDTO | Partial<TableRowDTO>,
+        data: Row | Partial<Row>,
         table: Table,
         httpService: HttpService
     ) {
-        const columnEntity: TableColumnEntity<TableColumn> = table.columns.reduce((acc, column) =>
+        const columnEntity: ColumnEntity<Column> = table.columns.reduce((acc, column) =>
             ({ ...acc, [column.name]: column }), {});//name column with column.name
         for (let i in columnEntity) {
             if (columnEntity[i].unique) {//check if unique cells has duplicates
@@ -48,7 +48,7 @@ export class ValidateRow {
         return data;
     }
 
-    isRequired(data: any, column: TableColumn) {
+    isRequired(data: any, column: Column) {
         if (column.required && !data && data !== 0) {
             return Promise.reject(`${column.name} is required in table row`);
         }
@@ -56,7 +56,7 @@ export class ValidateRow {
         return;
     }
 
-    isType(data: any, column: TableColumn) {
+    isType(data: any, column: Column) {
         if (!data && !column.required) return;//make sure defined data use the datatype formart
 
         if (column.datatype == TableDataTypes.TEXT) {
@@ -144,7 +144,7 @@ export class ValidateRow {
         return;
     }
 
-    async transform(data: any, column: TableColumn, httpService: HttpService) {
+    async transform(data: any, column: Column, httpService: HttpService) {
         if (column.datatype == TableDataTypes.IMAGE) {
             data.local = await this.downloadFile(data.url, "png", httpService);
         }
@@ -159,7 +159,7 @@ export class ValidateRow {
             url: url,
             method: 'GET',
             responseType: 'stream',
-        });
+        });        
         response.data.pipe(writer);
 
         return new Promise((resolve, reject) => {
